@@ -6,6 +6,5 @@ import org.junit.Test
 class TestDetector {
     @Test
     fun test() {
-        System.out.println(world())
     }
 }
