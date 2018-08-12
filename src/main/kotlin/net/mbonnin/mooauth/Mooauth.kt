@@ -30,7 +30,7 @@ class Mooauth(val authorizeUrl: String,
     }
 
     fun authorize() {
-        var token: String? = null
+        var finished = false
 
         System.out.println("acquiring oauth token")
 
@@ -39,6 +39,7 @@ class Mooauth(val authorizeUrl: String,
                 val result = exchangeCode(session.queryParameterString)
 
                 synchronized(lock) {
+                    finished = true
                     lock.notify()
                 }
 
@@ -51,7 +52,7 @@ class Mooauth(val authorizeUrl: String,
         openBrowser(authorizeUrl)
 
         synchronized(lock) {
-            while (token == null) {
+            while (!finished) {
                 lock.wait(1000)
             }
         }
