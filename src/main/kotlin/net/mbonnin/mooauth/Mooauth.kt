@@ -26,14 +26,14 @@ class Mooauth(val authorizeUrl: String, val exchangeCode: (state: String, code: 
     }
 
     fun authorize() {
-        val state = randomString(16)
         var token: String? = null
 
         System.out.println("acquiring oauth token")
 
         val server = object : NanoHTTPD(8941) {
             override fun serve(session: IHTTPSession): Response {
-                if (session.parms["state"] != state) {
+                val state = session.parms["state"]
+                if (state == null) {
                     return newFixedLengthResponse("bad state $state")
                 }
                 val code = session.parms["code"]
