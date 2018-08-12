@@ -36,13 +36,13 @@ class Mooauth(val authorizeUrl: String,
 
         val server = object : NanoHTTPD(httpPort) {
             override fun serve(session: IHTTPSession): Response {
-                val result = exchangeCode(session.uri)
+                val result = exchangeCode(session.queryParameterString)
 
                 synchronized(lock) {
                     lock.notify()
                 }
 
-                return newFixedLengthResponse("yay, you've been authorized !")
+                return newFixedLengthResponse(result)
             }
         }
 
