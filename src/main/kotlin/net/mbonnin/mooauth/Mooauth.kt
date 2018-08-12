@@ -14,7 +14,7 @@ import java.security.SecureRandom
  * @param httpPort: the port where the server will listen
  */
 class Mooauth(val authorizeUrl: String,
-              val exchangeCode: (state: String, code: String) -> String,
+              val exchangeCode: (uri: String) -> String,
               val httpPort: Int = 8941) {
     private val lock = java.lang.Object()
 
@@ -36,16 +36,7 @@ class Mooauth(val authorizeUrl: String,
 
         val server = object : NanoHTTPD(httpPort) {
             override fun serve(session: IHTTPSession): Response {
-                val state = session.parms["state"]
-                if (state == null) {
-                    return newFixedLengthResponse("bad state $state")
-                }
-                val code = session.parms["code"]
-                if (code == null) {
-                    return newFixedLengthResponse("bad code $code")
-                }
-
-                val result = exchangeCode(state, code)
+                val result = exchangeCode(session.uri)
 
                 synchronized(lock) {
                     lock.notify()
