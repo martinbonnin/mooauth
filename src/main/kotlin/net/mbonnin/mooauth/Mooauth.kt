@@ -7,11 +7,15 @@ import java.security.SecureRandom
 
 /**
  * Mooauth will open authorizeUrl in a browser and listen to potential redirects once the user logs in
+ * You must configure your oauth app with a redirect_uri set to http://localhost:port
  *
- * @param authorizeUrl: the url to open in a browser
+ * @param authorizeUrl: the url to open in a browser in the form https://github.com/login/oauth/authorize?client_id=[..]&scope=[..]&state=[..]&redirect_uri=[..]
  * @param exchangeCode: a callback to exchange the code for a valid token. This will be called from a thread
+ * @param httpPort: the port where the server will listen
  */
-class Mooauth(val authorizeUrl: String, val exchangeCode: (state: String, code: String) -> String) {
+class Mooauth(val authorizeUrl: String,
+              val exchangeCode: (state: String, code: String) -> String,
+              val httpPort: Int = 8941) {
     private val lock = java.lang.Object()
 
     fun randomString(len: Int): String {
@@ -30,7 +34,7 @@ class Mooauth(val authorizeUrl: String, val exchangeCode: (state: String, code: 
 
         System.out.println("acquiring oauth token")
 
-        val server = object : NanoHTTPD(8941) {
+        val server = object : NanoHTTPD(httpPort) {
             override fun serve(session: IHTTPSession): Response {
                 val state = session.parms["state"]
                 if (state == null) {
